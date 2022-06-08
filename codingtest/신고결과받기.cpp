@@ -1,3 +1,4 @@
+// 프로그래머스 - 신고 결과 받기 (level 1)
 #include <string>
 #include <vector>
 #include <iostream>
