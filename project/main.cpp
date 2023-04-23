@@ -120,5 +120,51 @@ namespace {
             : op_{op}, lhs_{std::move(lhs)}, rhs_{std::move(rhs)} {}
     };
 
+    // CallExprAST - Expression class for function calls.
+    class CallExprAST : public ExprAST {
+    private:
+        std::string callee_;
+        std::vector<std::unique_ptr<ExprAST>> args_;
+
+    public:
+        CallExprAST(std::string callee, std::vector<std::unique_ptr<ExprAST>> args)
+            : callee_{callee}, args_{std::move(args)} {}
+    };
+
+    // PrototypeAST - This class represents the "prototype" for a function,
+    // which captures its name, and its argument names (thus implicitly the number of arguments the function takes).
+    class PrototypeAST {
+    private:
+        std::string name_;
+        std::vector<std::string> args_;
+
+    public:
+        PrototypeAST(std::string name, std::vector<std::string> args)
+            : name_{name}, args_{std::move(args)} {}
+
+        std::string const& getName() const { return name_; }
+    };
     
-}
+    // FunctionAST - This class represents a function definition itself.
+    class FunctionAST {
+    private:
+        std::unique_ptr<PrototypeAST> proto_;
+        std::unique_ptr<ExprAST> body_;
+
+    public:
+        FunctionAST(std::unique_ptr<PrototypeAST> proto, std::unique_ptr<ExprAST> body)
+            : proto_{std::move(proto)}, body_{std::move(body)} {}
+    };
+} // end anonymous namespace
+
+//-----------------------
+// Parser
+//-----------------------
+
+// CurTok/getNextToken - Provide a simple token buffer. CurTok is the current token the parser is looking at.
+// getNextToken reads another token from the lexer and updates CurTok with its results.
+static int cur_tok;
+static int getNextToken() { return cur_tok = getTok();}
+
+// BinopPrecedence - This holds the precedence for each binary operator that is defined.
+static std::map<char, int> binop_precedence;
