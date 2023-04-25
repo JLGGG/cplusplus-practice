@@ -168,3 +168,36 @@ static int getNextToken() { return cur_tok = getTok();}
 
 // BinopPrecedence - This holds the precedence for each binary operator that is defined.
 static std::map<char, int> binop_precedence;
+
+// GetTokPrecedence - Get the precedence of the pending binary operator token.
+static int getTokPrecedence() {
+    if (!isascii(cur_tok)) {
+        return -1;
+    }
+
+    // Make sure it's a declared binop.
+    int tok_prec = binop_precedence[cur_tok];
+    if (tok_prec <= 0) {
+        return -1;
+    }
+    return tok_prec;
+}
+
+// LogError* - These are little helper functions for error handling.
+std::unique_ptr<ExprAST> logError(const char* str) {
+    fmt::print(stderr, "Error: {}\n", str);
+    return nullptr;
+}
+std::unique_ptr<PrototypeAST> logErrorP(const char* str) {
+    logError(str);
+    return nullptr;
+}
+
+static std::unique_ptr<ExprAST> parseExpression();
+
+// numberexpr ::= number
+static std::unique_ptr<ExprAST> parseNumberExpr() {
+    auto result = std::make_unique<NumberExprAST>(num_val);
+    getNextToken(); // consume the number
+    return std::move(result);
+}
