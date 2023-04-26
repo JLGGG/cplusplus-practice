@@ -201,3 +201,58 @@ static std::unique_ptr<ExprAST> parseNumberExpr() {
     getNextToken(); // consume the number
     return std::move(result);
 }
+
+// parenexpr ::= '(' expression ')'
+static std::unique_ptr<ExprAST> parseParenExpr() {
+    getNextToken(); // consume '('
+    auto v = parseExpression();
+    if (!v) {
+        return nullptr;
+    }
+
+    if (cur_tok != ')') {
+        return logError("expected ')'");
+    }
+    getNextToken(); // consume ')'
+    return v;
+}
+
+// identifierexpr
+// ::= identifier
+// ::= identifier '(' expression* ')'
+static std::unique_ptr<ExprAST> parseIdentifierExpr() {
+    std::string id_name = identifier_str;
+
+    getNextToken(); // consume identifier
+
+    if (cur_tok != '(') { // Simple variable ref.
+        return std::make_unique<VariableExprAST>(id_name);
+    }
+
+    // Call.
+    getNextToken(); // consume '('
+    std::vector<std::unique_ptr<ExprAST>> args;
+    if (cur_tok != ')') {
+        while (true) {
+            if (auto arg = parseExpression()) {
+                args.push_back(std::move(arg));
+            } else {
+                return nullptr;
+            }
+
+            if (cur_tok == ')') {
+                break;
+            }
+
+            if (cur_tok != ',') {
+                return logError("Expected ')' or ',' in argument list");
+            }
+            getNextToken();
+        }
+    }
+
+    // Eat the ')'.
+    getNextToken();
+
+    return std::make_unique<CallExprAST>(id_name, std::move(args));
+}
