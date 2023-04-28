@@ -256,3 +256,70 @@ static std::unique_ptr<ExprAST> parseIdentifierExpr() {
 
     return std::make_unique<CallExprAST>(id_name, std::move(args));
 }
+
+// primary
+// ::= identifierexpr
+// ::= numberexpr
+// ::= parenexpr
+static std::unique_ptr<ExprAST> parsePrimary() {
+    switch (cur_tok) {
+    default:
+        return logError("unknown token when expecting an expression");
+    case tok_identifier:
+        return parseIdentifierExpr();
+    case tok_number:
+        return parseNumberExpr();
+    case '(':
+        return parseParenExpr();
+    }
+}
+
+// binoprhs
+// ::= ('+' primary)*
+static std::unique_ptr<ExprAST> parseBinOpRHS(int expr_prec, std::unique_ptr<ExprAST> lhs) {
+    // If this is a binop, find its precedence.
+    while (true) {
+        int tok_prec = getTokPrecedence();
+
+        // If this is a binop that binds at least as tightly as the current binop,
+        // consume it, otherwise we are done.
+        if (tok_prec < expr_prec) {
+            return lhs;
+        }
+
+        // Okay, we know this is a binop.
+        int binop = cur_tok;
+        getNextToken(); // consume binop
+
+        // Parse the primary expression after the binary operator.
+        auto rhs = parsePrimary();
+        if (!rhs) {
+            return nullptr;
+        }
+
+        // If BinOp binds less tightly with RHS than the operator after RHS,
+        // let the pending operator take RHS as its LHS.
+        int next_prec = getTokPrecedence();
+        if (tok_prec < next_prec) {
+            rhs = parseBinOpRHS(tok_prec + 1, std::move(rhs));
+            if (!rhs) {
+                return nullptr;
+            }
+        }
+
+        // Merge LHS/RHS.
+        lhs = std::make_unique<BinaryExprAST>(binop, std::move(lhs), std::move(rhs));
+    }
+}
+
+// expression
+// ::= primary binoprhs
+//
+static std::unique_ptr<ExprAST> parseExpression() {
+    auto lhs = parsePrimary();
+    if (!lhs) {
+        return nullptr;
+    }
+
+    return parseBinOpRHS(0, std::move(lhs));
+}
