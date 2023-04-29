@@ -323,3 +323,31 @@ static std::unique_ptr<ExprAST> parseExpression() {
 
     return parseBinOpRHS(0, std::move(lhs));
 }
+
+// prototype
+// ::= id '(' id* ')'
+static std::unique_ptr<PrototypeAST> parsePrototype() {
+    if (cur_tok != tok_identifier) {
+        return logErrorP("Expected function name in prototype");
+    }
+
+    std::string fn_name = identifier_str;
+    getNextToken();
+
+    if (cur_tok != '(') {
+        return logErrorP("Expected '(' in prototype");
+    }
+
+    std::vector<std::string> arg_names;
+    while (getNextToken() == tok_identifier) {
+        arg_names.push_back(identifier_str);
+    }
+    if (cur_tok != ')') {
+        return logErrorP("Expected ')' in prototype");
+    }
+
+    // success.
+    getNextToken(); // eat ')'.
+
+    return std::make_unique<PrototypeAST>(fn_name, std::move(arg_names));
+}
