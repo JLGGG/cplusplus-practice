@@ -351,3 +351,17 @@ static std::unique_ptr<PrototypeAST> parsePrototype() {
 
     return std::make_unique<PrototypeAST>(fn_name, std::move(arg_names));
 }
+
+// definition ::= 'def' prototype expression
+static std::unique_ptr<FunctionAST> parseDefinition() {
+    getNextToken(); // eat def.
+    auto proto = parsePrototype();
+    if (!proto) {
+        return nullptr;
+    }
+
+    if (auto e = parseExpression()) {
+        return std::make_unique<FunctionAST>(std::move(proto), std::move(e));
+    }
+    return nullptr;
+}
