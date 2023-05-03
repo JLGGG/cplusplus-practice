@@ -1,10 +1,7 @@
-project/CMakeFiles
-project/main.dSYM
-project/CMakeCache.txt
-project/cmake_install.cmake
-project/Makefile
 .vscode
 codingtest
 .DS_Store
 setting.txt
 template-practice/build
+project/build
+modern-cplusplus-practice/build
