@@ -365,3 +365,19 @@ static std::unique_ptr<FunctionAST> parseDefinition() {
     }
     return nullptr;
 }
+
+// toplevelexpr ::= expression
+static std::unique_ptr<FunctionAST> parseTopLevelExpr() {
+    if (auto e = parseExpression()) {
+        // Make an anonymous proto.
+        auto proto = std::make_unique<PrototypeAST>("__anon_expr", std::vector<std::string>());
+        return std::make_unique<FunctionAST>(std::move(proto), std::move(e));
+    }
+    return nullptr;
+}
+
+// external ::= 'extern' prototype
+static std::unique_ptr<PrototypeAST> parseExtern() {
+    getNextToken(); // eat extern.
+    return parsePrototype();
+}
