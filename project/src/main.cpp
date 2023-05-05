@@ -381,3 +381,35 @@ static std::unique_ptr<PrototypeAST> parseExtern() {
     getNextToken(); // eat extern.
     return parsePrototype();
 }
+
+//-----------------------
+// Top-Level parsing
+// ----------------------
+
+static void handleDefinition() {
+    if (parseDefinition()) {
+        fmt::print(stderr, "Parsed a function definition.\n");
+    } else {
+        // Skip token for error recovery.
+        getNextToken();
+    }
+}
+
+static void handleExtern() {
+    if (parseExtern()) {
+        fmt::print(stderr, "Parsed an extern.\n");
+    } else {
+        // Skip token for error recovery.
+        getNextToken();
+    }
+}
+
+static void handleTopLevelExpression() {
+    // Evaluate a top-level expression into an anonymous function.
+    if (parseTopLevelExpr()) {
+        fmt::print(stderr, "Parsed a top-level expr.\n");
+    } else {
+        // Skip token for error recovery.
+        getNextToken();
+    }
+}
