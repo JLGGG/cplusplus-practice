@@ -6,13 +6,14 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <fmt/core.h>
 
 //-----------------------
 // Lexer
 //-----------------------
 
 // The lexer returns tokens [0-255] if it is an unknown character, otherwise one of these for known things.
-enum class Token {
+enum class Token : int {
     tok_eof = -1,
 
     // commands
@@ -22,7 +23,7 @@ enum class Token {
     // primary
     tok_identifier = -4,
     tok_number = -5
-}
+};
 
 static std::string identifier_str; // Filled in if tok_identifier
 static double num_val; // Filled in if tok_number
@@ -43,11 +44,11 @@ static int getTok() {
         }
 
         if (identifier_str == "def") {
-            return Token::tok_def;
+            return static_cast<int>(Token::tok_def);
         } else if (identifier_str == "extern") {
-            return Token::tok_extern;
+            return static_cast<int>(Token::tok_extern);
         }
-        return tok_identifier;
+        return static_cast<int>(Token::tok_identifier);
     }
 
     if (isdigit(last_char) || last_char == '.') { // Number: [0-9.]+
@@ -58,7 +59,7 @@ static int getTok() {
         } while (isdigit(last_char) || last_char == '.');
 
         num_val = strtod(num_str.c_str(), nullptr);
-        return tok_number;
+        return static_cast<int>(Token::tok_number);
     }
 
     if (last_char == '#') {
@@ -74,7 +75,7 @@ static int getTok() {
 
     // Check for end of file. Don't eat the EOF.
     if (last_char == EOF) {
-        return tok_eof;
+        return static_cast<int>(Token::tok_eof);
     }
 
     // Otherwise, just return the character as its ascii value.
@@ -265,9 +266,9 @@ static std::unique_ptr<ExprAST> parsePrimary() {
     switch (cur_tok) {
     default:
         return logError("unknown token when expecting an expression");
-    case tok_identifier:
+    case static_cast<int>(Token::tok_identifier):
         return parseIdentifierExpr();
-    case tok_number:
+    case static_cast<int>(Token::tok_number):
         return parseNumberExpr();
     case '(':
         return parseParenExpr();
@@ -327,7 +328,7 @@ static std::unique_ptr<ExprAST> parseExpression() {
 // prototype
 // ::= id '(' id* ')'
 static std::unique_ptr<PrototypeAST> parsePrototype() {
-    if (cur_tok != tok_identifier) {
+    if (cur_tok != static_cast<int>(Token::tok_identifier)) {
         return logErrorP("Expected function name in prototype");
     }
 
@@ -339,7 +340,7 @@ static std::unique_ptr<PrototypeAST> parsePrototype() {
     }
 
     std::vector<std::string> arg_names;
-    while (getNextToken() == tok_identifier) {
+    while (getNextToken() == static_cast<int>(Token::tok_identifier)) {
         arg_names.push_back(identifier_str);
     }
     if (cur_tok != ')') {
@@ -419,15 +420,15 @@ static void mainLoop() {
     while (true) {
         fmt::print("ready> ");
         switch (cur_tok) {
-        case tok_eof:
+        case static_cast<int>(Token::tok_eof):
             return;
         case ';': // ignore top-level semicolons.
             getNextToken();
             break;
-        case tok_def:
+        case static_cast<int>(Token::tok_def):
             handleDefinition();
             break;
-        case tok_extern:
+        case static_cast<int>(Token::tok_extern):
             handleExtern();
             break;
         default:
