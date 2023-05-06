@@ -413,3 +413,48 @@ static void handleTopLevelExpression() {
         getNextToken();
     }
 }
+
+// top ::= definition | external | expression | ';'
+static void mainLoop() {
+    while (true) {
+        fmt::print("ready> ");
+        switch (cur_tok) {
+        case tok_eof:
+            return;
+        case ';': // ignore top-level semicolons.
+            getNextToken();
+            break;
+        case tok_def:
+            handleDefinition();
+            break;
+        case tok_extern:
+            handleExtern();
+            break;
+        default:
+            handleTopLevelExpression();
+            break;
+        }
+    }
+}
+
+//-----------------------
+// Main driver code.
+//-----------------------
+
+int main() {
+    // Install standard binary operators.
+    // 1 is lowest precedence.
+    binop_precedence['<'] = 10;
+    binop_precedence['+'] = 20;
+    binop_precedence['-'] = 20;
+    binop_precedence['*'] = 40; // highest.
+
+    // Prime the first token.
+    fmt::print("ready> ");
+    getNextToken();
+
+    // Run the main "interpreter loop" now.
+    mainLoop();
+
+    return 0;
+}
