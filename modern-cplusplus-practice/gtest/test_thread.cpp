@@ -35,3 +35,26 @@ TEST_F(TestThread, atomic) {
     }
     fmt::print("Result = {}\n", counter);
 }
+
+TEST_F(TestThread, call_once) {
+    vector<thread> threads {3};
+    for (auto& t : threads) {
+        t = thread {ProcessingFunction};
+    }
+
+    for (auto& t : threads) {
+        t.join();
+    }
+}
+
+TEST_F(TestThread, spinlock) {
+    vector<size_t> data;
+    vector<thread> threads;
+    for (size_t i {0}; i<NumberOfThreads; ++i) {
+        threads.push_back(thread {dowork, i, ref(data)});
+    }
+    for (auto& t : threads) {
+        t.join();
+    }
+    fmt::print("data contains {} elements, expected {}.\n", data.size(), NumberOfThreads * LoopsPerThread);
+}
