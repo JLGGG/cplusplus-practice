@@ -58,3 +58,20 @@ TEST_F(TestThread, spinlock) {
     }
     fmt::print("data contains {} elements, expected {}.\n", data.size(), NumberOfThreads * LoopsPerThread);
 }
+
+TEST_F(TestThread, packaged_task) {
+    packaged_task<int(int, int)> task {CalculateSum};
+    auto my_future {task.get_future()};
+    thread my_thread {move(task), 100, 100};
+
+    fmt::print("Test packaged_task\n");
+
+    auto async_future {async(CalculateSum, 1000, 1000)};
+
+    int result {my_future.get()};
+    int async_result {async_future.get()};
+    fmt::print("Packaged_task Result: {}\n", result);
+    fmt::print("Async Result: {}\n", async_result);
+
+    my_thread.join();
+}

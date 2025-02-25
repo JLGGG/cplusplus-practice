@@ -3,6 +3,7 @@
 
 #include <thread>
 #include <stdexcept>
+#include <future>
 
 #include <atomic>
 
@@ -68,4 +69,8 @@ void dowork(size_t threadNumber, vector<size_t>& data) {
         data.push_back(threadNumber);
         spinlock.clear();
     }
+}
+
+int CalculateSum(int a, int b) {
+    return a + b;
 }
