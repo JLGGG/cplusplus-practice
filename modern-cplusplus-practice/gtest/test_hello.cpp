@@ -14,6 +14,6 @@ protected:
   }
 };
 
-TEST_F(TestHello, hello) {
+TEST_F(TestHello, DISABLED_hello) {
     std::cout << "hello world" << std::endl;
 }

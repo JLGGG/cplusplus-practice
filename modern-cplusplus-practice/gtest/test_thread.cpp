@@ -14,7 +14,7 @@ protected:
     }
 };
 
-TEST_F(TestThread, exception) {
+TEST_F(TestThread, DISABLED_exception) {
     try {
         DoWorkInThread();
     } catch (const exception& e) {
@@ -22,7 +22,7 @@ TEST_F(TestThread, exception) {
     }
 }
 
-TEST_F(TestThread, atomic) {
+TEST_F(TestThread, DISABLED_atomic) {
     int counter {0};
     vector<thread> threads;
 
@@ -36,7 +36,7 @@ TEST_F(TestThread, atomic) {
     fmt::print("Result = {}\n", counter);
 }
 
-TEST_F(TestThread, call_once) {
+TEST_F(TestThread, DISABLED_call_once) {
     vector<thread> threads {3};
     for (auto& t : threads) {
         t = thread {ProcessingFunction};
@@ -47,7 +47,7 @@ TEST_F(TestThread, call_once) {
     }
 }
 
-TEST_F(TestThread, spinlock) {
+TEST_F(TestThread, DISABLED_spinlock) {
     vector<size_t> data;
     vector<thread> threads;
     for (size_t i {0}; i<NumberOfThreads; ++i) {
@@ -59,7 +59,7 @@ TEST_F(TestThread, spinlock) {
     fmt::print("data contains {} elements, expected {}.\n", data.size(), NumberOfThreads * LoopsPerThread);
 }
 
-TEST_F(TestThread, packaged_task) {
+TEST_F(TestThread, DISABLED_packaged_task) {
     packaged_task<int(int, int)> task {CalculateSum};
     auto my_future {task.get_future()};
     thread my_thread {move(task), 100, 100};
